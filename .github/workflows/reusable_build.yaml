@@ -9,28 +9,23 @@ on:
 defaults:
   run:
     shell: bash
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   build_and_test:
     strategy:
       fail-fast: false
       matrix:
-        ros_distribution:
-          - foxy
-          - galactic
-          - humble
-          - rolling
-        ubuntu_distribution:
-          - focal
-          - jammy
-        exclude:
+        include:
           - ros_distribution: foxy
-            ubuntu_distribution: jammy
+            ubuntu_distribution: focal
           - ros_distribution: galactic
-            ubuntu_distribution: jammy
+            ubuntu_distribution: focal
           - ros_distribution: humble
-            ubuntu_distribution: focal
+            ubuntu_distribution: jammy
           - ros_distribution: rolling
-            ubuntu_distribution: focal
+            ubuntu_distribution: jammy
 
     name: Build and test
     runs-on: ubuntu-latest
