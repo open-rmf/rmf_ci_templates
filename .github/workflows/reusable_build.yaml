@@ -6,6 +6,19 @@ on:
         description: package names to build
         required: true
         type: string
+      dist-matrix:
+        description: dist matrix to build
+        required: false
+        type: string
+        default: |
+          [{"ros_distribution": "foxy",
+            "ubuntu_distribution": "focal"},
+          {"ros_distribution": "galactic",
+            "ubuntu_distribution": "focal"},
+          {"ros_distribution": "humble",
+            "ubuntu_distribution": "jammy"},
+          {"ros_distribution": "rolling",
+            "ubuntu_distribution": "jammy"}]
 defaults:
   run:
     shell: bash
@@ -17,15 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - ros_distribution: foxy
-            ubuntu_distribution: focal
-          - ros_distribution: galactic
-            ubuntu_distribution: focal
-          - ros_distribution: humble
-            ubuntu_distribution: jammy
-          - ros_distribution: rolling
-            ubuntu_distribution: jammy
+        include: ${{ fromJson(inputs.dist-matrix) }}
 
     name: Build and test
     runs-on: ubuntu-latest
