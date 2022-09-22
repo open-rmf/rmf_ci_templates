@@ -11,8 +11,8 @@ on:
         required: false
         type: string
         default: |
-          [{"ros_distribution": "rolling",
-            "ubuntu_distribution": "jammy"}]
+          [{"ros_distribution": "foxy",
+            "ubuntu_distribution": "focal"}]
 defaults:
   run:
     shell: bash
@@ -26,7 +26,7 @@ jobs:
       matrix:
         include: ${{ fromJson(inputs.dist-matrix) }}
     name: asan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container:
       image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
@@ -50,11 +50,17 @@ jobs:
           apt-get remove -y --purge libunwind-dev || true
           apt -y autoremove
         if: ${{ matrix.ubuntu_distribution == 'jammy'}}
+      - name: create_blacklist
+        run: |
+          mkdir -p ${{ github.workspace }}/
+          touch ${{ github.workspace }}/blacklist.txt
+          echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
       - name: asan_build_and_test
         uses: ros-tooling/action-ros-ci@v0.2
         env:
-          CC: clang
-          CXX: clang++
+          LANG: en_US.UTF-8
+          CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
+          CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           QT_QPA_PLATFORM: offscreen
         with:
           target-ros2-distro: ${{ matrix.ros_distribution }}
