@@ -35,14 +35,10 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     container:
-      image: rostooling/setup-ros-docker:ubuntu-${{ matrix.ubuntu_distribution }}-latest
+      image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
-      - name: setup ROS environment
-        uses: ros-tooling/setup-ros@v0.4
-        with:
-          required-ros-distributions: ${{ matrix.ros_distribution }}
-      - name: install_clang
-        run: sudo apt update && sudo apt install -y clang clang-tools lld
+      - name: install_clang_and_tools
+        run: sudo apt update && sudo apt install -y clang clang-tools lld wget
       # TODO: fix for cryptography>2.8 failing in galactic https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
       - name: fix cryptography==2.8 # https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
         run: pip3 install cryptography==2.8
