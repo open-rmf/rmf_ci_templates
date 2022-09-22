@@ -38,7 +38,7 @@ jobs:
       image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
       - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result
+        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       # TODO: fix for cryptography>2.8 failing in galactic https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
       - name: fix cryptography==2.8 # https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
         run: pip3 install cryptography==2.8
