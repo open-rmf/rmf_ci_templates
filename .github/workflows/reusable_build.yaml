@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v2
         if: failure()
         with:
-          name: test-results
+          name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build.outputs.ros-workspace-directory-name }}/build/*/test_results/*/*.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
