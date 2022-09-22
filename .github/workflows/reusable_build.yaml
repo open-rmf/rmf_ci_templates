@@ -61,7 +61,7 @@ jobs:
           apt-get remove -y --purge libunwind-dev || true
           apt -y autoremove
         if: ${{ matrix.ubuntu_distribution == 'jammy'}}
-      - name: build
+      - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.2
         env:
           CC: clang
@@ -80,17 +80,21 @@ jobs:
               }
             }
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+      - name: testing
+        run: |
+          echo "${{ steps.build_and_test.outputs.ros-workspace-directory-name }}"
+          ls
       - name: Upload colcon build logs
         uses: actions/upload-artifact@v2
         with:
           name: colcon-build-logs
-          path: ${{ steps.build.outputs.ros-workspace-directory-name }}/log
+          path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload colcon failed test results
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
-          path: ${{ steps.build.outputs.ros-workspace-directory-name }}/build/*/test_results/*/*.xml
+          path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
