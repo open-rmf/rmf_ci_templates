@@ -2,6 +2,10 @@ name: reusable_build
 on:
   workflow_call:
     inputs:
+      asan:
+        type: boolean
+        required: false
+        default: false
       packages:
         description: package names to build
         required: true
@@ -33,6 +37,7 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
     container:
+      # TODO: check if "desktop" is really needed for the builds or tests
       image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
       - name: install_clang_and_tools
@@ -55,11 +60,25 @@ jobs:
           apt-get remove -y --purge libunwind-dev || true
           apt -y autoremove
         if: ${{ matrix.ubuntu_distribution == 'jammy'}}
+      - name: create_blacklist
+        if: ${{ inputs.asan }}
+        run: |
+          mkdir -p ${{ github.workspace }}/
+          touch ${{ github.workspace }}/blacklist.txt
+          echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
+      - name: set_mixins
+        run: |
+          if [[ ${{ inputs.asan }} ]]; then
+              echo "::set-output mixin_options=['asan-gcc','lld']"
+          else
+              echo "::set-output mixin_options=['coverage-gcc', 'lld']"
+          fi
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.2
         env:
-          CC: clang
-          CXX: clang++
+          LANG: en_US.UTF-8
+          CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
+          CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           QT_QPA_PLATFORM: offscreen
         with:
           target-ros2-distro: ${{ matrix.ros_distribution }}
@@ -70,7 +89,7 @@ jobs:
           colcon-defaults: |
             {
               "build": {
-                "mixin": ["coverage-gcc", "lld"]
+                "mixin": [${{ steps.set_mixins.outputs.mixin_options }}, "lld" ]
               }
             }
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
@@ -85,6 +104,12 @@ jobs:
         with:
           name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
+      - name: Upload asan test logs
+        if:  ${{ inputs.asan }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: colcon-asan-logs
+          path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
