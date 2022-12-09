@@ -61,11 +61,12 @@ jobs:
           apt -y autoremove
         if: ${{ matrix.ubuntu_distribution == 'jammy'}}
       - name: create_blacklist
-        if: ${{ inputs.asan }}
         run: |
           mkdir -p ${{ github.workspace }}/
           touch ${{ github.workspace }}/blacklist.txt
-          echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
+          if [[ ${{ inputs.asan }} ]]; then
+            echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
+          fi
       - name: set mixins
         id: set_mixins
         run: |
