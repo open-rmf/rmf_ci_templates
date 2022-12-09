@@ -25,7 +25,7 @@ defaults:
   run:
     shell: bash
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
+  group: ${{ github.head_ref || github.ref_name }}-${{inputs.asan}}
   cancel-in-progress: true
 jobs:
   build_and_test:
