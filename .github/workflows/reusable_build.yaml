@@ -66,12 +66,13 @@ jobs:
           mkdir -p ${{ github.workspace }}/
           touch ${{ github.workspace }}/blacklist.txt
           echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
-      - name: set_mixins
+      - name: set mixins
+        id: set_mixins
         run: |
           if [[ ${{ inputs.asan }} ]]; then
-              echo "::set-output mixin_options=['asan-gcc','lld']"
+              echo "mixin_options=\"asan-gcc\"" >> $GITHUB_OUTPUT
           else
-              echo "::set-output mixin_options=['coverage-gcc', 'lld']"
+              echo "mixin_options=\"coverage-gcc\"" >> $GITHUB_OUTPUT
           fi
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.2
