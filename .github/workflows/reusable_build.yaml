@@ -82,7 +82,8 @@ jobs:
           CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           QT_QPA_PLATFORM: offscreen
-          ASAN_OPTIONS: detect_leaks=0
+          # We have some new_delete_type_mismatch errors that looks like to come from rclcpp
+          ASAN_OPTIONS: detect_leaks=0:new_delete_type_mismatch=0
         with:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           # build all packages listed in the meta package
