@@ -2,10 +2,10 @@ name: reusable_build
 on:
   workflow_call:
     inputs:
-      asan:
-        type: boolean
+      mixin:
+        type: string
         required: false
-        default: false
+        default: build
       packages:
         description: package names to build
         required: true
@@ -25,7 +25,7 @@ defaults:
   run:
     shell: bash
 concurrency:
-  group: ${{ github.head_ref || github.ref_name }}-${{inputs.asan}}
+  group: ${{ github.head_ref || github.ref_name }}-${{inputs.mixin}}
   cancel-in-progress: true
 jobs:
   build_and_test:
@@ -64,17 +64,23 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/
           touch ${{ github.workspace }}/blacklist.txt
-          if [[ ${{ inputs.asan }} ]]; then
+          if [[ ${{ inputs.mixin }} == "asan" ]]; then
             echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
           fi
       - name: set mixins
         id: set_mixins
         run: |
-          if [[ ${{ inputs.asan }} ]]; then
-            echo 'colcon_defaults={"build":{"mixin":["asan-gcc","lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
-          else
-            echo 'colcon_defaults={"build": {"mixin": ["coverage-gcc", "lld" ]}}' >> $GITHUB_OUTPUT 
-          fi
+          case ${{ inputs.mixin }} in
+            asan)
+                echo 'colcon_defaults={"build":{"mixin":["asan-gcc","lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
+                ;;
+            tsan)
+                echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
+                ;;
+            *)
+                echo 'colcon_defaults={"build": {"mixin": ["coverage-gcc", "lld" ]}}' >> $GITHUB_OUTPUT 
+                ;;
+          esac
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.2
         env:
@@ -104,7 +110,7 @@ jobs:
           name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload asan test logs
-        if:  ${{ inputs.asan }}
+        if:  ${{ inputs.mixin }} == "asan"
         uses: actions/upload-artifact@v2
         with:
           name: colcon-asan-logs
