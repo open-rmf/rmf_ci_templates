@@ -115,6 +115,12 @@ jobs:
         with:
           name: colcon-asan-logs
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
+      - name: Upload tsan test logs
+        if: ${{ inputs.mixin }} == "tsan"
+        uses: actions/upload-artifact@v2
+        with:
+          name: colcon-tsan-logs
+          path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
