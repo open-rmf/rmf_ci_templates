@@ -72,7 +72,7 @@ jobs:
                 ;;
           esac
       - name: build_and_test
-        uses: ros-tooling/action-ros-ci@v0.2
+        uses: ros-tooling/action-ros-ci@v0.3
         env:
           LANG: en_US.UTF-8
           CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
