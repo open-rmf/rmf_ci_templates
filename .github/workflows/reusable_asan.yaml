@@ -43,10 +43,10 @@ jobs:
       # TODO: Remove this step when the incompatibility between libunwind14 and libundind dissapears https://github.com/open-rmf/rmf_traffic_editor/issues/439
       - name: Horrible hack for libceres
         run: |
-          apt-get remove -y --purge libc++-dev || true 
+          apt-get remove -y --purge libc++-dev || true
           apt-get remove -y --purge libc++abi-dev || true
-          apt-get remove -y --purge libunwind-14-dev || true 
-          apt-get remove -y --purge libunwind-14-dev || true 
+          apt-get remove -y --purge libunwind-14-dev || true
+          apt-get remove -y --purge libunwind-14-dev || true
           apt-get remove -y --purge libunwind-dev || true
           apt -y autoremove
         if: ${{ matrix.ubuntu_distribution == 'jammy'}}
@@ -67,7 +67,7 @@ jobs:
           # build all packages listed in the meta package
           package-name: ${{ inputs.packages }}
           vcs-repo-file-url: |
-            https://raw.githubusercontent.com/open-rmf/rmf/main/rmf.repos
+            https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos
           colcon-defaults: |
             {
               "build": {
