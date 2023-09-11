@@ -85,7 +85,7 @@ jobs:
           # build all packages listed in the meta package
           package-name: ${{ inputs.packages }}
           vcs-repo-file-url: |
-            https://raw.githubusercontent.com/open-rmf/rmf/main/rmf.repos
+            https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - name: Upload colcon build logs
