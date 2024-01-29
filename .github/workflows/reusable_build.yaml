@@ -39,7 +39,7 @@ jobs:
       image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
       - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
+        run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       # TODO: Remove this step when the incompatibility between libunwind14 and libundind dissapears https://github.com/open-rmf/rmf_traffic_editor/issues/439
       - name: Horrible hack for libceres
         run: |
@@ -68,9 +68,13 @@ jobs:
                 echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
-                echo 'colcon_defaults={"build": {"mixin": ["coverage-gcc", "lld" ]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld" ]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/ccache
+          key: ccache
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.3
         env:
