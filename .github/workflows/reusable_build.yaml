@@ -15,7 +15,9 @@ on:
         required: false
         type: string
         default: |
-          [{"ros_distribution": "humble",
+          [{"ros_distribution": "iron",
+            "ubuntu_distribution": "jammy"},
+          {"ros_distribution": "humble",
             "ubuntu_distribution": "jammy"},
           {"ros_distribution": "rolling",
             "ubuntu_distribution": "jammy"}]
