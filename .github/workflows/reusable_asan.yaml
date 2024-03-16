@@ -11,8 +11,12 @@ on:
         required: false
         type: string
         default: |
-          [{"ros_distribution": "foxy",
-            "ubuntu_distribution": "focal"}]
+          [{"ros_distribution": "humble",
+            "ubuntu_distribution": "jammy"},
+          {"ros_distribution": "iron",
+            "ubuntu_distribution": "jammy"},
+          {"ros_distribution": "rolling",
+            "ubuntu_distribution": "jammy"}]
 defaults:
   run:
     shell: bash

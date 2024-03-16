@@ -7,10 +7,11 @@ on:
 
 jobs:
   build_and_test:
-    name: rmf_traffic_editor
+    name: test_ci
     uses: ./.github/workflows/reusable_build.yaml
     with:
       # NOTE: Avoid adding comments in the packages lines, this can break some of the called scripts in github actions
-      # NOTE: Using rmf_utils just for workflow testing porposes
+      # NOTE: Build upto rmf_fleet_adapter_python and rmf_visualization to cover all core open-rmf packages.
       packages: |
-        rmf_utils
+        rmf_fleet_adapter_python
+        rmf_visualization
