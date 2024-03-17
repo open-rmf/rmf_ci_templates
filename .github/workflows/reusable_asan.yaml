@@ -16,7 +16,7 @@ on:
           {"ros_distribution": "iron",
             "ubuntu_distribution": "jammy"},
           {"ros_distribution": "rolling",
-            "ubuntu_distribution": "jammy"}]
+            "ubuntu_distribution": "noble"}]
 defaults:
   run:
     shell: bash
