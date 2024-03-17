@@ -42,7 +42,7 @@ jobs:
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
       - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
+        run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       - name: create_blacklist
         run: |
           mkdir -p ${{ github.workspace }}/
@@ -61,9 +61,13 @@ jobs:
                 echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
-                echo 'colcon_defaults={"build": {"mixin": ["coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/ccache
+          key: ccache
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.3
         env:
