@@ -1,4 +1,4 @@
-name: build
+name: asan
 on:
   pull_request:
   schedule:
@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_test:
-    name: test_ci
-    uses: ./.github/workflows/reusable_build.yaml
+  build_and_test_asan:
+    name: test_ci_asan
+    uses: ./.github/workflows/reusable_asan.yaml
     with:
       # NOTE: Avoid adding comments in the packages lines, this can break some of the called scripts in github actions
       # NOTE: Build upto rmf_fleet_adapter_python and rmf_visualization to cover all core open-rmf packages.
