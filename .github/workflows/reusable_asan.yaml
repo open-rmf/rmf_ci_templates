@@ -17,73 +17,11 @@ on:
             "ubuntu_distribution": "jammy"},
           {"ros_distribution": "rolling",
             "ubuntu_distribution": "noble"}]
-defaults:
-  run:
-    shell: bash
-concurrency:
-  group: ${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: true
 jobs:
   asan:
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(inputs.dist-matrix) }}
     name: asan
-    runs-on: ubuntu-20.04
-    container:
-      image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
-    steps:
-      - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
-      # TODO: fix for cryptography>2.8 failing in galactic https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
-      - name: fix cryptography==2.8 # https://github.com/open-rmf/rmf/pull/202#pullrequestreview-1100045417
-        run: pip3 install cryptography==2.8
-        if: ${{ matrix.ros_distribution == 'galactic' || matrix.ros_distribution == 'foxy' }}
-      # TODO: remove this when uncrustify 0.72 is fixed https://github.com/uncrustify/uncrustify/issues/3191
-      - name: hack for uncrustify 0.72 problems
-        run: wget http://mirrors.kernel.org/ubuntu/pool/universe/u/uncrustify/uncrustify_0.69.0+dfsg1-1build1_amd64.deb && dpkg -i uncrustify_0.69.0+dfsg1-1build1_amd64.deb && apt install -f -y
-        if: ${{ matrix.ubuntu_distribution == 'jammy'}}
-      # TODO: Remove this step when the incompatibility between libunwind14 and libundind dissapears https://github.com/open-rmf/rmf_traffic_editor/issues/439
-      - name: Horrible hack for libceres
-        run: |
-          apt-get remove -y --purge libc++-dev || true
-          apt-get remove -y --purge libc++abi-dev || true
-          apt-get remove -y --purge libunwind-14-dev || true
-          apt-get remove -y --purge libunwind-14-dev || true
-          apt-get remove -y --purge libunwind-dev || true
-          apt -y autoremove
-        if: ${{ matrix.ubuntu_distribution == 'jammy'}}
-      - name: create_blacklist
-        run: |
-          mkdir -p ${{ github.workspace }}/
-          touch ${{ github.workspace }}/blacklist.txt
-          echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
-      - name: asan_build_and_test
-        uses: ros-tooling/action-ros-ci@v0.3
-        env:
-          LANG: en_US.UTF-8
-          CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
-          CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
-          QT_QPA_PLATFORM: offscreen
-        with:
-          target-ros2-distro: ${{ matrix.ros_distribution }}
-          # build all packages listed in the meta package
-          package-name: ${{ inputs.packages }}
-          vcs-repo-file-url: |
-            https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos
-          colcon-defaults: |
-            {
-              "build": {
-                "mixin": ["asan-gcc", "lld"],
-                "cmake-args": ["-DCMAKE_BUILD_TYPE=Debug"],
-                "executor": "sequential"
-              }
-            }
-          colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-      - name: upload_test_stream
-        uses: actions/upload-artifact@v2
-        with:
-          name: colcon-asan-logs
-          path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
-        if: always()
+    uses: ./.github/workflows/reusable_build.yaml
+    with:
+      dist-matrix: ${{inputs.dist-matrix}}
+      packages: ${{inputs.packages}}
+      mixin: asan
