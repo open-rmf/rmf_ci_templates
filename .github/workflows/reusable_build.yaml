@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # TODO: check if "desktop" is really needed for the builds or tests
-      image: osrf/ros:${{ matrix.ros_distribution }}-desktop-full-${{ matrix.ubuntu_distribution }}
+      image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
