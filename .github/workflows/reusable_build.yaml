@@ -44,19 +44,19 @@ jobs:
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
       - name: install_tools
-        run: sudo apt update && sudo apt install -y ccache wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
+        run: sudo apt update && sudo apt install -y ccache lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       - name: set mixins
         id: set_mixins
         run: |
           case ${{ inputs.mixin }} in
             asan)
-                echo 'colcon_defaults={"build":{"mixin":["asan-gcc"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["asan-gcc", "lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
                 ;;
             tsan)
-                echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["tsan", "lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
-                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
       - uses: actions/cache@v3
