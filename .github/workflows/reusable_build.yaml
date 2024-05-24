@@ -43,15 +43,8 @@ jobs:
     steps:
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
-      - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
-      - name: create_blacklist
-        run: |
-          mkdir -p ${{ github.workspace }}/
-          touch ${{ github.workspace }}/blacklist.txt
-          if [[ ${{ inputs.mixin }} == "asan" ]]; then
-            echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
-          fi
+      - name: install_tools
+        run: sudo apt update && sudo apt install -y ccache wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       - name: set mixins
         id: set_mixins
         run: |
@@ -63,7 +56,7 @@ jobs:
                 echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
-                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
       - uses: actions/cache@v3
@@ -74,8 +67,6 @@ jobs:
         uses: ros-tooling/action-ros-ci@v0.3
         env:
           LANG: en_US.UTF-8
-          CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
-          CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           QT_QPA_PLATFORM: offscreen
           # We have some new_delete_type_mismatch errors that looks like to come from rclcpp
           ASAN_OPTIONS: detect_leaks=0:new_delete_type_mismatch=0
