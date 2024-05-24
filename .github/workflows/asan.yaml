@@ -11,7 +11,8 @@ jobs:
     uses: ./.github/workflows/reusable_asan.yaml
     with:
       # NOTE: Avoid adding comments in the packages lines, this can break some of the called scripts in github actions
-      # NOTE: Build upto rmf_fleet_adapter_python and rmf_visualization to cover all core open-rmf packages.
+      # NOTE: Build upto rmf_fleet_adapter and rmf_visualization to cover all core open-rmf packages.
+      # # rmf_fleet_adapter_python causes spurious asan failures because of leaks in the Python side
       packages: |
-        rmf_fleet_adapter_python
+        rmf_fleet_adapter
         rmf_visualization
