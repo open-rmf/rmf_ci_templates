@@ -37,9 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # TODO: check if "desktop" is really needed for the builds or tests
-      # TODO(luca): Restore to this image once rolling-desktop-full is migrated to noble
-      # image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
-      image: ros:${{ matrix.ros_distribution }}
+      image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
       - name: create_blacklist
         run: |
@@ -49,7 +47,7 @@ jobs:
             echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
           fi
       - name: Setup ROS
-        uses: ros-tooling/setup-ros@christophebedard/noble-install-libclang-rt-dev
+        uses: ros-tooling/setup-ros@d8f32e519cd758bc3a3ffa0bf13ec77544aae30f
       - name: install_tools
         run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
       - name: set mixins
