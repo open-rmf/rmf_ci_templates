@@ -17,8 +17,10 @@ on:
         default: |
           [{"ros_distribution": "humble",
             "ubuntu_distribution": "jammy"},
+          {"ros_distribution": "iron",
+            "ubuntu_distribution": "jammy"},
           {"ros_distribution": "rolling",
-            "ubuntu_distribution": "jammy"}]
+            "ubuntu_distribution": "noble"}]
 defaults:
   run:
     shell: bash
@@ -31,25 +33,12 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(inputs.dist-matrix) }}
-
     name: Build and test
     runs-on: ubuntu-latest
     container:
       # TODO: check if "desktop" is really needed for the builds or tests
       image: osrf/ros:${{ matrix.ros_distribution }}-desktop-${{ matrix.ubuntu_distribution }}
     steps:
-      - name: install_clang_and_tools
-        run: sudo apt update && sudo apt install -y clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov
-      # TODO: Remove this step when the incompatibility between libunwind14 and libundind dissapears https://github.com/open-rmf/rmf_traffic_editor/issues/439
-      - name: Horrible hack for libceres
-        run: |
-          apt-get remove -y --purge libc++-dev || true
-          apt-get remove -y --purge libc++abi-dev || true
-          apt-get remove -y --purge libunwind-14-dev || true
-          apt-get remove -y --purge libunwind-14-dev || true
-          apt-get remove -y --purge libunwind-dev || true
-          apt -y autoremove
-        if: ${{ matrix.ubuntu_distribution == 'jammy'}}
       - name: create_blacklist
         run: |
           mkdir -p ${{ github.workspace }}/
@@ -57,26 +46,36 @@ jobs:
           if [[ ${{ inputs.mixin }} == "asan" ]]; then
             echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
           fi
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+      - name: install_tools
+        run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp
       - name: set mixins
         id: set_mixins
         run: |
           case ${{ inputs.mixin }} in
             asan)
-                echo 'colcon_defaults={"build":{"mixin":["asan-gcc","lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["asan-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
             tsan)
-                echo 'colcon_defaults={"build":{"mixin":["tsan"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["tsan", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
-                echo 'colcon_defaults={"build": {"mixin": ["coverage-gcc", "lld" ]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/ccache
+          key: ccache
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.3
         env:
           LANG: en_US.UTF-8
           CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
+          # Fastdds causes spurious failures in asan action, default to cyclonedds
+          RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
           QT_QPA_PLATFORM: offscreen
           # We have some new_delete_type_mismatch errors that looks like to come from rclcpp
           ASAN_OPTIONS: detect_leaks=0:new_delete_type_mismatch=0
