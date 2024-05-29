@@ -47,7 +47,7 @@ jobs:
             echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
           fi
       - name: Setup ROS
-        uses: ros-tooling/setup-ros@d8f32e519cd758bc3a3ffa0bf13ec77544aae30f
+        uses: ros-tooling/setup-ros@v0.7
       - name: install_tools
         run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp
       - name: set mixins
@@ -74,6 +74,7 @@ jobs:
           LANG: en_US.UTF-8
           CC: clang -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
           CXX: clang++ -fsanitize-blacklist=${{ github.workspace }}/blacklist.txt
+          # Fastdds causes spurious failures in asan action, default to cyclonedds
           RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
           QT_QPA_PLATFORM: offscreen
           # We have some new_delete_type_mismatch errors that looks like to come from rclcpp
