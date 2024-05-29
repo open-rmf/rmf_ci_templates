@@ -55,10 +55,10 @@ jobs:
         run: |
           case ${{ inputs.mixin }} in
             asan)
-                echo 'colcon_defaults={"build":{"mixin":["asan-gcc", "lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"],"executor":"sequential"}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["asan-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
             tsan)
-                echo 'colcon_defaults={"build":{"mixin":["tsan", "lld"],"cmake-args":["-DCMAKE_BUILD_TYPE=Debug"]}}' >> $GITHUB_OUTPUT
+                echo 'colcon_defaults={"build":{"mixin":["tsan", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
             *)
                 echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
