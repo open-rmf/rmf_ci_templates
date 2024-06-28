@@ -27,7 +27,7 @@ on:
         description: branch to use for rmf.repos file, defaults to the branch named after the ros distribution in the matrix
         required: false
         type: string
-        default: ''
+        default: ""
 defaults:
   run:
     shell: bash
@@ -75,14 +75,13 @@ jobs:
         with:
           path: ~/.cache/ccache
           key: ccache
-      - name: set repos file if branch branch override is present
-        if: ${{ inputs.repos-branch-override }} != ''
+      - name: set repos file
         run: |
-          echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
-      - name: set repos file if branch branch override is not present
-        if: ${{ inputs.repos-branch-override }} == ''
-        run: |
-          echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros-distribution }}/rmf.repos" >> $GITHUB_ENV
+          if [ -z ${{ inputs.repos-branch-override }} ]; then
+            echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos" >> $GITHUB_ENV
+          else
+            echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
+          fi
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.3
         env:
