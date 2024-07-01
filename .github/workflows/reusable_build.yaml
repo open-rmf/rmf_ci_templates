@@ -23,6 +23,11 @@ on:
            "ubuntu_distribution": "noble"},
           {"ros_distribution": "rolling",
             "ubuntu_distribution": "noble"}]
+      repos-branch-override:
+        description: branch to use for rmf.repos file, defaults to the branch named after the ros distribution in the matrix
+        required: false
+        type: string
+        default: ""
 defaults:
   run:
     shell: bash
@@ -70,6 +75,13 @@ jobs:
         with:
           path: ~/.cache/ccache
           key: ccache
+      - name: set repos file
+        run: |
+          if [ -z ${{ inputs.repos-branch-override }} ]; then
+            echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos" >> $GITHUB_ENV
+          else
+            echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
+          fi
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.3
         env:
@@ -85,8 +97,7 @@ jobs:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           # build all packages listed in the meta package
           package-name: ${{ inputs.packages }}
-          vcs-repo-file-url: |
-            https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos
+          vcs-repo-file-url: ${{ env.REPOS_URL }}
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - name: Upload colcon build logs
