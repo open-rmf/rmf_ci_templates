@@ -101,25 +101,25 @@ jobs:
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - name: Upload colcon build logs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: colcon-build-logs
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload colcon failed test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload asan test logs
         if:  ${{ inputs.mixin }} == "asan"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: colcon-asan-logs
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload tsan test logs
         if: ${{ inputs.mixin }} == "tsan"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: colcon-tsan-logs
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
