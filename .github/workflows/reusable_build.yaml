@@ -124,7 +124,7 @@ jobs:
           name: colcon-tsan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ros_ws/lcov/total_coverage.info
           flags: tests
