@@ -103,7 +103,7 @@ jobs:
       - name: Upload colcon build logs
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-build-logs
+          name: colcon-build-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload colcon failed test results
         uses: actions/upload-artifact@v4
@@ -115,13 +115,13 @@ jobs:
         if:  ${{ inputs.mixin }} == "asan"
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-asan-logs
+          name: colcon-asan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload tsan test logs
         if: ${{ inputs.mixin }} == "tsan"
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-tsan-logs
+          name: colcon-tsan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
