@@ -56,7 +56,7 @@ jobs:
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
       - name: install_tools
-        run: sudo apt update && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp
+        run: sudo apt update && sudo apt upgrade -y && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp
       - name: set mixins
         id: set_mixins
         run: |
@@ -71,7 +71,7 @@ jobs:
                 echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ~/.cache/ccache
           key: ccache
@@ -101,30 +101,30 @@ jobs:
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - name: Upload colcon build logs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: colcon-build-logs
+          name: colcon-build-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload colcon failed test results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload asan test logs
         if:  ${{ inputs.mixin }} == "asan"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: colcon-asan-logs
+          name: colcon-asan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload tsan test logs
         if: ${{ inputs.mixin }} == "tsan"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: colcon-tsan-logs
+          name: colcon-tsan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           files: ros_ws/lcov/total_coverage.info
           flags: tests
