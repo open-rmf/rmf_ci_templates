@@ -17,8 +17,6 @@ on:
         default: |
           [{"ros_distribution": "humble",
             "ubuntu_distribution": "jammy"},
-          {"ros_distribution": "iron",
-            "ubuntu_distribution": "jammy"},
           {"ros_distribution": "jazzy",
            "ubuntu_distribution": "noble"},
           {"ros_distribution": "rolling",
