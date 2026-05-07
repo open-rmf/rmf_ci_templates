@@ -16,7 +16,7 @@ on:
           {"ros_distribution": "jazzy",
            "ubuntu_distribution": "noble"},
           {"ros_distribution": "rolling",
-            "ubuntu_distribution": "noble"}]
+            "ubuntu_distribution": "resolute"}]
 jobs:
   asan:
     name: asan
