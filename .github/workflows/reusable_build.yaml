@@ -22,7 +22,7 @@ on:
           {"ros_distribution": "lyrical",
            "ubuntu_distribution": "resolute"},
           {"ros_distribution": "rolling",
-            "ubuntu_distribution": "noble"}]
+            "ubuntu_distribution": "resolute"}]
       repos-branch-override:
         description: branch to use for rmf.repos file, defaults to the branch named after the ros distribution in the matrix
         required: false
