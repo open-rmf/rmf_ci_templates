@@ -100,6 +100,7 @@ jobs:
           vcs-repo-file-url: ${{ env.REPOS_URL }}
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          use-ros2-testing: ${{ matrix.ros_distribution == 'rolling' }}
       - name: Upload colcon build logs
         uses: actions/upload-artifact@v4
         with:
