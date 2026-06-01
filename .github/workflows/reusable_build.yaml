@@ -84,6 +84,8 @@ jobs:
           else
             echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
           fi
+      - name: install clang-rt
+        run: sudo apt install libclang-rt-dev -y
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.4
         env:
