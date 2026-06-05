@@ -73,10 +73,10 @@ jobs:
                 echo 'colcon_defaults={"build": {"mixin": ["ccache", "coverage-gcc", "lld"]}}' >> $GITHUB_OUTPUT
                 ;;
           esac
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ccache
-          key: ccache
+      # - uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/ccache
+      #     key: ccache
       - name: set repos file
         run: |
           if [ -z ${{ inputs.repos-branch-override }} ]; then
