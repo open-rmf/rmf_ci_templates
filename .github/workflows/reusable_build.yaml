@@ -83,6 +83,13 @@ jobs:
           else
             echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
           fi
+      - name: Check installed packages
+        run: apt list --installed | tee installed.txt
+      - name: Upload isntalled package list
+        uses: actions/upload-artifact@v4
+        with:
+          name: installed_packages_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}.txt
+          path: installed.txt
       - name: build_and_test
         uses: ros-tooling/action-ros-ci@v0.4
         env:
