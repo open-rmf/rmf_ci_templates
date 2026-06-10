@@ -60,7 +60,7 @@ jobs:
         run: sudo apt update && sudo apt upgrade -y && sudo apt install --install-recommends -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp build-essential
       - name: install clang
         if:  ${{ matrix.ubuntu_distribution }} == "resolute"
-        run: sudo apt install --install-recommends -y libstdc++-16-dev
+        run: sudo apt install --install-recommends -y libstdc++-15-dev
       - name: set mixins
         id: set_mixins
         run: |
