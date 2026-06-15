@@ -53,7 +53,7 @@ jobs:
             echo "fun:*Eigen*" >  ${{ github.workspace }}/blacklist.txt
           fi
       - name: Setup ROS
-        uses: ros-tooling/setup-ros@a45da158f95f27fea0a57c88fa1da6275b0e4ed3
+        uses: ros-tooling/setup-ros@0.7.19
         with:
           use-ros2-testing: ${{ matrix.ros_distribution == 'rolling' }}
       - name: install_tools
