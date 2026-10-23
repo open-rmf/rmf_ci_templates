@@ -62,8 +62,8 @@ jobs:
       - name: install libstdc++-16-dev for resolute
         if: matrix.ubuntu_distribution == 'resolute'
         run: sudo apt install --install-recommends -y libstdc++-16-dev
-      - name: fix vmap for tsan
-        if: ${{ inputs.mixin == 'tsan' }}
+      - name: fix vmap for sanitizers
+        if: ${{ inputs.mixin == 'tsan' || inputs.mixin == 'asan' }}
         run: sudo sysctl vm.mmap_rnd_bits=28
       - name: set mixins
         id: set_mixins
