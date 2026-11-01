@@ -41,7 +41,12 @@ jobs:
       matrix:
         include: ${{ fromJson(inputs.dist-matrix) }}
     name: Build and test
-    runs-on: ubuntu-latest
+    # After ubuntu-latest migrated to ubuntu-26.04, test errors started appearing
+    # for tsan because vm.mmap_rnd_bits settings changed between 24.04 and 26.04.
+    # This should be fixed after https://github.com/actions/runner-images/pull/15146
+    # is merged. Then we can go back to ubuntu-latest.
+    # PR: https://github.com/open-rmf/rmf_ci_templates/pull/30
+    runs-on: ubuntu-24.04
     container:
       image: ubuntu:${{ matrix.ubuntu_distribution }}
     steps:
