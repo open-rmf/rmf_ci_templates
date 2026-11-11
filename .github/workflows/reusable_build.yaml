@@ -15,16 +15,17 @@ on:
         required: false
         type: string
         default: |
-          [{"ros_distribution": "humble",
-            "ubuntu_distribution": "jammy"},
-          {"ros_distribution": "jazzy",
-           "ubuntu_distribution": "noble"},
-          {"ros_distribution": "lyrical",
-           "ubuntu_distribution": "resolute"},
-          {"ros_distribution": "rolling",
-            "ubuntu_distribution": "resolute"}]
+          [{"ros_distribution": "humble"},
+          {"ros_distribution": "jazzy"},
+          {"ros_distribution": "lyrical"},
+          {"ros_distribution": "rolling"}]
       repos-branch-override:
-        description: branch to use for rmf.repos file, defaults to the branch named after the ros distribution in the matrix
+        description: branch to use for rmf.repos file, defaults (or "auto") to the branch named after the ros distribution in the matrix
+        required: false
+        type: string
+        default: ""
+      ros-distribution:
+        description: optional single ROS distribution to build (overrides dist-matrix when non-empty)
         required: false
         type: string
         default: ""
@@ -39,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(inputs.dist-matrix) }}
+        include: ${{ fromJson(inputs.ros-distribution != '' && format('[{{"ros_distribution":"{0}"}}]', inputs.ros-distribution) || inputs.dist-matrix) }}
     name: Build and test
     # After ubuntu-latest migrated to ubuntu-26.04, test errors started appearing
     # for tsan because vm.mmap_rnd_bits settings changed between 24.04 and 26.04.
@@ -48,7 +49,13 @@ jobs:
     # PR: https://github.com/open-rmf/rmf_ci_templates/pull/30
     runs-on: ubuntu-24.04
     container:
-      image: ubuntu:${{ matrix.ubuntu_distribution }}
+      image: >-
+        ubuntu:${{
+        matrix.ubuntu_distribution ||
+        (matrix.ros_distribution == 'humble' && 'jammy' ||
+        ((matrix.ros_distribution == 'jazzy' || matrix.ros_distribution == 'kilted') && 'noble' ||
+        ((matrix.ros_distribution == 'lyrical' || matrix.ros_distribution == 'rolling') && 'resolute' || '')))
+        }}
     steps:
       - name: create_blacklist
         run: |
@@ -65,7 +72,7 @@ jobs:
         run: sudo apt update && sudo apt upgrade -y && sudo apt install -y ccache clang clang-tools lld wget python3-pip python3-colcon-coveragepy-result python3-colcon-lcov-result lcov ros-${{ matrix.ros_distribution }}-rmw-cyclonedds-cpp
       # NOTE (aaronchongth): Installing explicitly due to https://github.com/open-rmf/rmf_ci_templates/issues/26
       - name: install libstdc++-16-dev for resolute
-        if: matrix.ubuntu_distribution == 'resolute'
+        if: matrix.ubuntu_distribution == 'resolute' || (!matrix.ubuntu_distribution && (matrix.ros_distribution == 'lyrical' || matrix.ros_distribution == 'rolling'))
         run: sudo apt install --install-recommends -y libstdc++-16-dev
       - name: fix vmap for sanitizers
         if: ${{ inputs.mixin == 'tsan' || inputs.mixin == 'asan' }}
@@ -90,7 +97,7 @@ jobs:
           key: ccache
       - name: set repos file
         run: |
-          if [ -z ${{ inputs.repos-branch-override }} ]; then
+          if [ -z "${{ inputs.repos-branch-override }}" ] || [ "${{ inputs.repos-branch-override }}" = "auto" ]; then
             echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ matrix.ros_distribution }}/rmf.repos" >> $GITHUB_ENV
           else
             echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
@@ -116,25 +123,25 @@ jobs:
       - name: Upload colcon build logs
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-build-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
+          name: colcon-build-logs_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload colcon failed test results
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-results_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
+          name: test-results_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload asan test logs
         if:  ${{ inputs.mixin }} == "asan"
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-asan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
+          name: colcon-asan-logs_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload tsan test logs
         if: ${{ inputs.mixin }} == "tsan"
         uses: actions/upload-artifact@v4
         with:
-          name: colcon-tsan-logs_${{ matrix.ubuntu_distribution }}_${{ matrix.ros_distribution }}
+          name: colcon-tsan-logs_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
