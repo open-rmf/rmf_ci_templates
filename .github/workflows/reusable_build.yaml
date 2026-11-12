@@ -3,15 +3,19 @@ on:
   workflow_call:
     inputs:
       mixin:
+        description: 'Build/sanitizer mixin to run: "build" (default), "asan", or "tsan"'
         type: string
         required: false
         default: build
       packages:
-        description: package names to build
+        description: Newline-separated package names to build and test
         required: true
         type: string
       dist-matrix:
-        description: dist matrix to build
+        description: >
+          JSON array of matrix entries (e.g. [{"ros_distribution": "humble"}]).
+          "ubuntu_distribution" is optional and auto-mapped for humble (jammy),
+          jazzy/kilted (noble), and lyrical/rolling (resolute).
         required: false
         type: string
         default: |
@@ -20,12 +24,12 @@ on:
           {"ros_distribution": "lyrical"},
           {"ros_distribution": "rolling"}]
       repos-branch-override:
-        description: branch to use for rmf.repos file, defaults (or "auto") to the branch named after the ros distribution in the matrix
+        description: 'Branch of open-rmf/rmf to fetch rmf.repos from; empty or "auto" uses matrix.ros_distribution'
         required: false
         type: string
         default: ""
       ros-distribution:
-        description: optional single ROS distribution to build (overrides dist-matrix when non-empty)
+        description: 'Optional single ROS distribution to build ("humble", "jazzy", "kilted", "lyrical", or "rolling"); overrides dist-matrix when non-empty'
         required: false
         type: string
         default: ""
