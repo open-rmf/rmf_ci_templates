@@ -1,4 +1,6 @@
-name: asan
+# DEPRECATED: Use reusable_build.yaml with `mixin: asan` instead.
+# Kept for backwards compatibility with existing callers and release branches.
+name: asan (deprecated)
 on:
   workflow_call:
     inputs:
@@ -11,17 +13,13 @@ on:
         required: false
         type: string
         default: |
-          [{"ros_distribution": "humble",
-            "ubuntu_distribution": "jammy"},
-          {"ros_distribution": "jazzy",
-           "ubuntu_distribution": "noble"},
-          {"ros_distribution": "lyrical",
-           "ubuntu_distribution": "resolute"},
-          {"ros_distribution": "rolling",
-            "ubuntu_distribution": "resolute"}]
+          [{"ros_distribution": "humble"},
+          {"ros_distribution": "jazzy"},
+          {"ros_distribution": "lyrical"},
+          {"ros_distribution": "rolling"}]
 jobs:
   asan:
-    name: asan
+    name: asan (deprecated)
     uses: ./.github/workflows/reusable_build.yaml
     with:
       dist-matrix: ${{inputs.dist-matrix}}
