@@ -107,6 +107,7 @@ jobs:
             echo "REPOS_URL=https://raw.githubusercontent.com/open-rmf/rmf/${{ inputs.repos-branch-override }}/rmf.repos" >> $GITHUB_ENV
           fi
       - name: build_and_test
+        id: build_and_test
         uses: ros-tooling/action-ros-ci@v0.4
         env:
           LANG: en_US.UTF-8
@@ -125,6 +126,7 @@ jobs:
           colcon-defaults: ${{ steps.set_mixins.outputs.colcon_defaults }}
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
       - name: Upload colcon build logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: colcon-build-logs_${{ matrix.ros_distribution }}
@@ -136,13 +138,13 @@ jobs:
           name: test-results_${{ matrix.ros_distribution }}
           path: ros_ws/build/*/test_results/*/*.xml
       - name: Upload asan test logs
-        if: ${{ inputs.mixin == 'asan' }}
+        if: ${{ always() && inputs.mixin == 'asan' }}
         uses: actions/upload-artifact@v4
         with:
           name: colcon-asan-logs_${{ matrix.ros_distribution }}
           path: ${{ steps.build_and_test.outputs.ros-workspace-directory-name }}/log
       - name: Upload tsan test logs
-        if: ${{ inputs.mixin == 'tsan' }}
+        if: ${{ always() && inputs.mixin == 'tsan' }}
         uses: actions/upload-artifact@v4
         with:
           name: colcon-tsan-logs_${{ matrix.ros_distribution }}
